@@ -6,34 +6,39 @@
 #define PI      3.14159265358979
 #define GRAVITY 9.80665
 
-#define TRACKER_X 0.19708
-#define TRACKER_Y 0.10282
+// #define TRACKER_X 0.19708
+// #define TRACKER_Y 0.10282
+// #define TRACKER_X -0.11142
+// #define TRACKER_Y -0.16138
+#define TRACKER_X -0.1865
+#define TRACKER_Y -0.1322
 
-#define BASELINK_X  0.04258
-// #define BASELINK_X  0.20
-// #define BASELINK_Y  0.0
-#define BASELINK_Y -0.02938
-// #define T_TIME 1.5
+// #define BASELINK_X  0.04258
+// #define BASELINK_Y -0.02938
+// #define BASELINK_X  -0.053
+#define BASELINK_X  0.0
+#define BASELINK_Y  0.0
+// #define T_TIME 1.5   
 #define T_TIME 3.0
 
 //no robot
 
-#define T_2 0.232
+#define T_2 0.275
 #define Cyf 132   // 66.8 132.0
 #define Cyr 98      // 50 98 
-#define LF  0.367
-#define LR  0.453
+#define LF  0.263
+#define LR  0.349
 #define TIRE_RADIUS 0.105
 #define MASS 90.687
 #define IZ   6.75
 
 
 //*have robot
-// #define T_2 0.232
+// #define T_2 0.275
 // #define Cyf 287   // 66.8 132.0
 // #define Cyr 244      // 50 98 
-// #define LF  0.367
-// #define LR  0.453
+// #define LF  0.263
+// #define LR  0.349
 // #define TIRE_RADIUS 0.105
 // #define MASS 113.27 
 // #define IZ   12 //12

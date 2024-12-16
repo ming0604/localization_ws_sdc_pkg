@@ -175,6 +175,58 @@ int shm2tck(void *ptr, TRACKER *tckPtr)
 	return 1;
 }
 
+// int ros2amcl(void *ptr, AMCLPOSE *amclPtr)
+int ros2amcl(double *ptr, AMCLPOSE *amclPtr)
+{
+	// if(*(bool*)ptr){
+	// 	amclPtr->valid = true;
+	// 	printf("amcl:	");
+	// 	//_______________ time _______________
+	// 	// amclPtr->time = ((double*)((bool*)ptr+1))[0];
+	// 	// printf("  %f ", amclPtr->time);
+	// 	//_______________ pose (listen_tf)_______________
+	// 	for(int m=0; m<3; m++){
+	// 		amclPtr->pose[m] = ((double*)((bool*)ptr+1))[m];
+	// 		printf("  %f ", amclPtr->pose[m-1]);
+	// 	}
+	// 	//______________ linVel ______________
+	// 	// for(int m=0; m<3; m++){
+	// 	// 	amclPtr->ekf_v[m] = ((double*)((bool*)ptr+1))[m+3];
+	// 	// 	printf("  %f ", amclPtr->ekf_v[m]);
+	// 	// }
+	// 	// amclPtr->imu = ((double*)((bool*)ptr+1))[6];
+	// 	// 	printf("  %f ", amclPtr->imu);
+	// }
+
+	// listen amcl (double)
+	if(*ptr){
+		amclPtr->valid = true;
+		// printf("amcl:	");
+		//_______________ time _______________
+		amclPtr->time = ptr[0];
+		// printf("  %f ", amclPtr->time);
+		//_______________ pose _______________
+		for(int m=1; m<4; m++){
+			amclPtr->pose[m-1] = ptr[m];
+			// printf("  %f ", amclPtr->pose[m-1]);
+		}
+		//______________ linVel ______________
+		for(int m=0; m<3; m++){
+			amclPtr->ekf_v[m] = ptr[m+4];
+			// printf("  %f ", amclPtr->ekf_v[m]);
+		}
+		//______________ imu ______________
+		amclPtr->imu = ptr[7];
+			// printf("  %f ", amclPtr->imu);
+	}
+	else{
+		amclPtr->valid = false;
+	}
+	// printf("\n");
+
+	return 1;
+}
+
 
 //========================================================================
 //                            signal filter
@@ -189,10 +241,10 @@ void dataShift(double *data, int length)
 
 void differentiator(double *x, double *y)
 {
-	//low pass filter hz = 2.59 order 3 is same with Cheng   by Ryan
+	// low pass filter hz = 2.59 order 3 is same with Cheng   by Ryan
 	// y[0] = 0.4304*x[0] +0.9265*x[1] -1.091*x[2] -0.2663*x[3]+2.178*y[1]-1.582*y[2] +0.3829*y[3];
 
-	// low pass filter hz = 3 by Ryan
+	// low pass filter a = 5.88, cutoff 2.96 hz by Ryan
 	y[0] = 0.6413*x[0] +1.307*x[1] -1.58*x[2] -0.3681*x[3]+2.072*y[1]-1.431*y[2] +0.3296*y[3];
 
 	//low pass filter hz = 4 by Ryan
@@ -218,6 +270,18 @@ void differentiator_amcl(double *x, double *y)
 	// low pass filter: 3 order 
 	// y[0] = 0.02685*x[0] +0.07027*x[1] -0.07519*x[2] -0.02193*x[3]+2.626*y[1]-2.294*y[2] +0.6667*y[3];
 
+	// butterworth filter: 2 order, cutoff 3.0 hz
+	y[0] = 1.624*x[0] -0.1382*x[1] -1.486*x[2]+1.735*y[1]-0.766*y[2];
+
+	// butterworth filter: 2 order, cutoff 2.5 hz
+	// y[0] = 1.145*x[0] -0.08175*x[1] -1.063*x[2]+1.779*y[1]-0.8008*y[2];
+
+	// butterworth filter: 2 order, cutoff 2.0 hz
+	// y[0] = 0.7438*x[0] -0.0428*x[1] -0.701*x[2]+1.823*y[1]-0.8372*y[2];
+
+	// butterworth filter: 2 order, cutoff 1.8 hz
+	// y[0] = 0.06061*x[0] -0.03148*x[1] -0.5747*x[2]+1.84*y[1]-0.8522*y[2];
+	
 	// butterworth filter: 2 order, cutoff 1.5 hz
 	// y[0] = 0.4247*x[0] -0.01846*x[1] -0.4063*x[2]+1.867*y[1]-0.8752*y[2];
 	
@@ -228,7 +292,7 @@ void differentiator_amcl(double *x, double *y)
 	// y[0] = 0.1916*x[0] -0.005593*x[1] -0.186*x[2]+1.911*y[1]-0.915*y[2];
 	
 	// low pass filter: 2 order, cutoff 0.871 hz
-	y[0] = 0.3855*x[0] -0.02345*x[1] -0.362*x[2]+1.82*y[1]-0.8284*y[2];
+	// y[0] = 0.3855*x[0] -0.02345*x[1] -0.362*x[2]+1.82*y[1]-0.8284*y[2];
 
 	// low pass filter: 2 order, cutoff 0.7 hz
 	// y[0] = 0.2241*x[0] -0.01*x[1] -0.2141*x[2]+1.868*y[1]-0.872*y[2];
@@ -269,6 +333,7 @@ void LPfilter(double *x, double *y)
 	//y[0] = 0.0485*x[0] + 0.1432*x[1] + 0.0259*x[2] + 1.0670*y[1] - 0.2846*y[2]; 
 
 }
+
 void LPfilter_2(double *x, double *y){
 	//hz =  2(hz) order:1
 	y[0] = 0.8781*y[1]+0.06227*x[0] + 0.05963*x[1]; 
@@ -287,12 +352,23 @@ void LPfilter_2(double *x, double *y){
 void LPfilter_1_order(double *x, double *y)
 {
 	y[0] = x[0];
+
+	// y[0] = 0.03347*x[0]+0.03272*x[1]+0.9338*y[1];
+	//y[0] = 0.8781*y[1]+0.06227*x[0] + 0.05963*x[1]; //cutoff freq. 2(hz) order:1
+}
+
+void LPfilter_2_order(double *x, double *y)
+{
+	// y[0] = x[0];
+
+	y[0] = 0.001305*x[0]+0.004982*x[1]+0.001188*x[2]+1.821*y[1]-0.8284*y[2];
 	//y[0] = 0.8781*y[1]+0.06227*x[0] + 0.05963*x[1]; //cutoff freq. 2(hz) order:1
 }
 
 //========================================================================
 //                                tck2cg
 //========================================================================
+// int tck2cg(TRACKER tck, CG *cgPtr, AMCLPOSE *amclPtr)
 int tck2cg(TRACKER tck, CG *cgPtr)
 {
 	// shift data history
@@ -303,14 +379,29 @@ int tck2cg(TRACKER tck, CG *cgPtr)
 	dataShift(cgPtr->ddy, 5);
 	dataShift(cgPtr->dr, 5);
 
-
 	dataShift(cgPtr->VX, 3);
 	dataShift(cgPtr->VY, 3);
 	dataShift(cgPtr->VXLPF, 3);
 	dataShift(cgPtr->VYLPF, 3);
 	dataShift(cgPtr->rLPF, 4);
-	
 
+	// dataShift(amclPtr->x, 5);
+	// dataShift(amclPtr->y, 5);
+	// dataShift(amclPtr->yaw, 5);
+	// dataShift(amclPtr->linVel_x, 5);
+	// dataShift(amclPtr->linVel_y, 5);
+	// dataShift(amclPtr->angVel_yaw, 5);
+	// dataShift(amclPtr->VXLPF, 3);
+	// dataShift(amclPtr->VYLPF, 3);
+	// dataShift(amclPtr->rLPF, 4);
+	
+	// amclPtr->x[0] = amclPtr->pose[0];
+	// amclPtr->y[0] = amclPtr->pose[1];
+	// amclPtr->yaw[0] = amclPtr->pose[2];
+
+	// differentiator_amcl(amclPtr->x, amclPtr->linVel_x);
+	// differentiator_amcl(amclPtr->y, amclPtr->linVel_y);
+	// differentiator_amcl(amclPtr->yaw, amclPtr->angVel_yaw);
 
 	// get CG data
 	cgPtr->psi = atan2(tck.pose[1][0], tck.pose[0][0]); // atan return -PI ~ PI
@@ -339,7 +430,9 @@ int tck2cg(TRACKER tck, CG *cgPtr)
 	LPfilter(cgPtr->VY, cgPtr->VYLPF);
 	LPfilter(cgPtr->r, cgPtr->rLPF);
 
-
+	// LPfilter_2_order(amclPtr->linVel_x, amclPtr->VXLPF);
+	// LPfilter_2_order(amclPtr->linVel_y, amclPtr->VYLPF);
+	// LPfilter_2_order(amclPtr->angVel_yaw, amclPtr->rLPF);
 
 	cgPtr->AX = cgPtr->ddx[0]*cos(cgPtr->psi) + cgPtr->ddy[0]*sin(cgPtr->psi);
 	cgPtr->AY = -cgPtr->ddx[0]*sin(cgPtr->psi) + cgPtr->ddy[0]*cos(cgPtr->psi);
@@ -353,9 +446,10 @@ int tck2cg(TRACKER tck, CG *cgPtr)
 }
 
 //========================================================================
-//                                tck2cg
+//                                amcl2cg
 //========================================================================
 int amcl2cg(AMCLPOSE *amclPtr, CG *cgaPtr)
+// int amcl2cg(AMCLPOSE *amclPtr, CG *cgaPtr, CG *cgPtr)
 {
 	// shift data history
 	dataShift(cgaPtr->dx, 5);
@@ -364,7 +458,6 @@ int amcl2cg(AMCLPOSE *amclPtr, CG *cgaPtr)
 	dataShift(cgaPtr->ddx, 5);
 	dataShift(cgaPtr->ddy, 5);
 	dataShift(cgaPtr->dr, 5);
-
 
 	dataShift(cgaPtr->VX, 3);
 	dataShift(cgaPtr->VY, 3);
@@ -385,7 +478,7 @@ int amcl2cg(AMCLPOSE *amclPtr, CG *cgaPtr)
 	dataShift(amclPtr->VXLPF, 3);
 	dataShift(amclPtr->VYLPF, 3);
 	dataShift(amclPtr->rLPF, 4);
-	
+
 	amclPtr->x[0] = amclPtr->pose[0];
 	amclPtr->y[0] = amclPtr->pose[1];
 	amclPtr->yaw[0] = amclPtr->pose[2];
@@ -393,8 +486,8 @@ int amcl2cg(AMCLPOSE *amclPtr, CG *cgaPtr)
 	amclPtr->ekf_vx[0] = amclPtr->ekf_v[0];
 	amclPtr->ekf_vy[0] = amclPtr->ekf_v[1];
 
-	LPfilter(amclPtr->ekf_vx, amclPtr->ekf_vxl);
-	LPfilter(amclPtr->ekf_vy, amclPtr->ekf_vyl);
+	LPfilter_2(amclPtr->ekf_vx, amclPtr->ekf_vxl);
+	LPfilter_2(amclPtr->ekf_vy, amclPtr->ekf_vyl);
 
 	differentiator_amcl(amclPtr->x, amclPtr->linVel_x);
 	differentiator_amcl(amclPtr->y, amclPtr->linVel_y);
@@ -452,7 +545,7 @@ int amcl2cg(AMCLPOSE *amclPtr, CG *cgaPtr)
 
 	return 1;
 }
-int signal2cg(TRACKER tck, AMCLPOSE *amclPtr, CG *cgPtr, CG *cgaPtr, double t){
+int signal2cg(TRACKER tck, AMCLPOSE *amclPtr, CG *cgPtr, CG *cgaPtr, double t, double trans){
 	tck2cg(tck, cgPtr);
 
 	// shift data history
@@ -490,8 +583,8 @@ int signal2cg(TRACKER tck, AMCLPOSE *amclPtr, CG *cgPtr, CG *cgaPtr, double t){
 	amclPtr->ekf_vx[0] = amclPtr->ekf_v[0];
 	amclPtr->ekf_vy[0] = amclPtr->ekf_v[1];
 
-	LPfilter(amclPtr->ekf_vx, amclPtr->ekf_vxl);
-	LPfilter(amclPtr->ekf_vy, amclPtr->ekf_vyl);
+	LPfilter_2(amclPtr->ekf_vx, amclPtr->ekf_vxl);
+	LPfilter_2(amclPtr->ekf_vy, amclPtr->ekf_vyl);
 
 	differentiator_amcl(amclPtr->x, amclPtr->linVel_x);
 	differentiator_amcl(amclPtr->y, amclPtr->linVel_y);
@@ -506,20 +599,36 @@ int signal2cg(TRACKER tck, AMCLPOSE *amclPtr, CG *cgPtr, CG *cgaPtr, double t){
 
 	cgaPtr->x = cgaPtr->P_BX + amclPtr->pose[0] - cgaPtr->px;
 	cgaPtr->y = cgaPtr->P_BY + amclPtr->pose[1] - cgaPtr->py;
-
-	// smoothTransition(cgPtr, cgaPtr, t);
-	
-	// if(t<3.0){
-	// 	amclPtr->linVel_x[0] = tck.linVel[0];
-	// 	amclPtr->linVel_y[0] = tck.linVel[1];
-	// 	amclPtr->imu = tck.angVel[2];
-	// }
 	
 	cgaPtr->X = cgaPtr->x*cos(cgaPtr->psi) + cgaPtr->y*sin(cgaPtr->psi);
 	cgaPtr->Y = -cgaPtr->x*sin(cgaPtr->psi) + cgaPtr->y*cos(cgaPtr->psi);
-	cgaPtr->r[0] = amclPtr->imu;
-	cgaPtr->dx[0] = amclPtr->linVel_x[0] + cgaPtr->py*amclPtr->imu;
-	cgaPtr->dy[0] = amclPtr->linVel_y[0] - cgaPtr->px*amclPtr->imu;
+
+	// if(t<1.0){
+	// 	cgaPtr->r[0] = tck.angVel[2];
+	// 	cgaPtr->dx[0] = tck.linVel[0] + cgPtr->py*tck.angVel[2];
+	// 	cgaPtr->dy[0] = tck.linVel[1] - cgPtr->px*tck.angVel[2];
+	// }else{
+	// 	cgaPtr->r[0] = amclPtr->imu;
+	// 	cgaPtr->dx[0] = amclPtr->linVel_x[0] + cgaPtr->py*amclPtr->imu;
+	// 	cgaPtr->dy[0] = amclPtr->linVel_y[0] - cgaPtr->px*amclPtr->imu;
+	// }
+	if(t<0.65){
+		cgaPtr->r[0] = amclPtr->imu;
+		cgaPtr->dx[0] = amclPtr->ekf_vxl[0] + cgPtr->py*amclPtr->imu;
+		cgaPtr->dy[0] = amclPtr->ekf_vyl[0] - cgPtr->px*amclPtr->imu;
+	}else{
+		cgaPtr->r[0] = amclPtr->imu;
+		cgaPtr->dx[0] = amclPtr->linVel_x[0] + cgaPtr->py*amclPtr->imu;
+		cgaPtr->dy[0] = amclPtr->linVel_y[0] - cgaPtr->px*amclPtr->imu;
+	}
+
+	if(trans){
+		if(t > trans){
+			printf("[Transtition]\n");
+			smoothTransition_tck(cgPtr, cgaPtr, amclPtr, t);
+		}
+	}
+	
 	cgaPtr->VX[0] = cgaPtr->dx[0]*cos(cgaPtr->psi) + cgaPtr->dy[0]*sin(cgaPtr->psi);
 	cgaPtr->VY[0] = -cgaPtr->dx[0]*sin(cgaPtr->psi) + cgaPtr->dy[0]*cos(cgaPtr->psi);
 
@@ -532,9 +641,23 @@ int signal2cg(TRACKER tck, AMCLPOSE *amclPtr, CG *cgPtr, CG *cgaPtr, double t){
 	// printf("%lf, %lf, %lf\n", amclPtr->linVel_x[0] + cgPtr->py*amclPtr->angVel_yaw[0], amclPtr->linVel_y[0] - cgPtr->px*amclPtr->angVel_yaw[0], amclPtr->angVel_yaw[0]);
 	// printf("%lf, %lf, %lf\n", cgPtr->dx[0], cgPtr->dy[0], cgPtr->r[0]);
 	// low pass filter
-	LPfilter_1_order(cgaPtr->VX, cgaPtr->VXLPF);
-	LPfilter_1_order(cgaPtr->VY, cgaPtr->VYLPF);
-	LPfilter_1_order(cgaPtr->r, cgaPtr->rLPF);
+
+	if(trans){
+		if(t > trans){
+			LPfilter(cgaPtr->VX, cgaPtr->VXLPF);
+			LPfilter(cgaPtr->VY, cgaPtr->VYLPF);
+			LPfilter(cgaPtr->r, cgaPtr->rLPF);
+		}
+		else{
+			LPfilter_1_order(cgaPtr->VX, cgaPtr->VXLPF);
+			LPfilter_1_order(cgaPtr->VY, cgaPtr->VYLPF);
+			LPfilter_1_order(cgaPtr->r, cgaPtr->rLPF);
+		}
+	}else{
+		LPfilter_1_order(cgaPtr->VX, cgaPtr->VXLPF);
+		LPfilter_1_order(cgaPtr->VY, cgaPtr->VYLPF);
+		LPfilter_1_order(cgaPtr->r, cgaPtr->rLPF);
+	}
 
 	// LPfilter_2_order(amclPtr->linVel_x, amclPtr->VXLPF);
 	// LPfilter_2_order(amclPtr->linVel_y, amclPtr->VYLPF);
@@ -554,17 +677,63 @@ int signal2cg(TRACKER tck, AMCLPOSE *amclPtr, CG *cgPtr, CG *cgaPtr, double t){
 	
 }
 
-double sigmoid(double x, double k){
-	return 1.0 / (1.0 + exp(-k * (x - 3.0)));
+double sigmoid(double x, double k, double m){
+	return 1.0 / (1.0 + exp(-k * (x - m)));
 }
 
-void smoothTransition(CG *cgPtr, CG *cgaPtr, double t){
-	double transitionProgress = t / T_TIME;
-	double sigmoidValue = sigmoid(transitionProgress, 5.0);
+void smoothTransition_tck(CG *cgPtr, CG *cgaPtr, AMCLPOSE *amclPtr, double t){
+	// double transitionProgress = t / T_TIME;
+	// double sigmoidV = sigmoid(t, 5.0, 5.3);
+	double sigmoidV = sigmoid(t, 5.0, 4.3);
+	double sigmoidV0 = 1 - sigmoidV;
 
-	cgaPtr->x = (1.0 - sigmoidValue) * cgPtr->x + sigmoidValue * cgaPtr->x;
-	cgaPtr->y = (1.0 - sigmoidValue) * cgPtr->y + sigmoidValue * cgaPtr->y;
-	cgaPtr->psi = (1.0 - sigmoidValue) * cgPtr->psi + sigmoidValue * cgaPtr->psi;
+	// cgaPtr->r[0] = amclPtr->imu;
+	// cgaPtr->dx[0] = amclPtr->linVel_x[0] + cgaPtr->py*amclPtr->imu;
+	// cgaPtr->dy[0] = amclPtr->linVel_y[0] - cgaPtr->px*amclPtr->imu;
+
+	cgaPtr->x = sigmoidV * cgPtr->x + sigmoidV0 * cgaPtr->x;
+	cgaPtr->y = sigmoidV * cgPtr->y + sigmoidV0 * cgaPtr->y;
+	cgaPtr->psi = sigmoidV * cgPtr->psi + sigmoidV0 * cgaPtr->psi;
+
+	// cgaPtr->r[0] = amclPtr->imu;
+	cgaPtr->r[0] = sigmoidV * cgPtr->r[0] + sigmoidV0 * cgaPtr->r[0];
+	cgaPtr->dx[0] = sigmoidV * cgPtr->dx[0] + sigmoidV0 * cgaPtr->dx[0];
+	cgaPtr->dy[0] = sigmoidV * cgPtr->dy[0] + sigmoidV0 * cgaPtr->dy[0];
+
+	// cgaPtr->x = sigmoidV * cgaPtr->x + sigmoidV0 * cgPtr->x;
+	// cgaPtr->y = sigmoidV * cgaPtr->y + sigmoidV0 * cgPtr->y;
+	// cgaPtr->psi = sigmoidV * cgaPtr->psi + sigmoidV0 * cgPtr->psi;
+
+	// cgaPtr->r[0] = sigmoidV * cgaPtr->r[0] + sigmoidV0 * cgPtr->r[0];
+	// cgaPtr->dx[0] = sigmoidV * cgaPtr->dx[0] + sigmoidV0 * cgPtr->dx[0];
+	// cgaPtr->dy[0] = sigmoidV * cgaPtr->dy[0] + sigmoidV0 * cgPtr->dy[0];
+}
+
+void smoothTransition_amcl(CG *cgPtr, CG *cgaPtr, AMCLPOSE *amclPtr, double t){
+	// double transitionProgress = t / T_TIME;
+	// double sigmoidV = sigmoid(t, 10.0, 3.5);
+	double sigmoidV = sigmoid(t, 10.0, 11.0);
+	double sigmoidV0 = 1 - sigmoidV;
+
+	cgaPtr->r[0] = amclPtr->imu;
+	cgaPtr->dx[0] = amclPtr->linVel_x[0] + cgaPtr->py*amclPtr->imu;
+	cgaPtr->dy[0] = amclPtr->linVel_y[0] - cgaPtr->px*amclPtr->imu;
+
+	// cgaPtr->x = sigmoidV * cgPtr->x + sigmoidV0 * cgaPtr->x;
+	// cgaPtr->y = sigmoidV * cgPtr->y + sigmoidV0 * cgaPtr->y;
+	// cgaPtr->psi = sigmoidV * cgPtr->psi + sigmoidV0 * cgaPtr->psi;
+
+	// cgaPtr->r[0] = sigmoidV * cgPtr->r[0] + sigmoidV0 * cgaPtr->r[0];
+	// cgaPtr->dx[0] = sigmoidV * cgPtr->dx[0] + sigmoidV0 * cgaPtr->dx[0];
+	// cgaPtr->dy[0] = sigmoidV * cgPtr->dy[0] + sigmoidV0 * cgaPtr->dy[0];
+
+	cgaPtr->x = sigmoidV * cgaPtr->x + sigmoidV0 * cgPtr->x;
+	cgaPtr->y = sigmoidV * cgaPtr->y + sigmoidV0 * cgPtr->y;
+	cgaPtr->psi = sigmoidV * cgaPtr->psi + sigmoidV0 * cgPtr->psi;
+
+	cgaPtr->r[0] = sigmoidV * cgaPtr->r[0] + sigmoidV0 * cgPtr->r[0];
+	cgaPtr->dx[0] = sigmoidV * cgaPtr->dx[0] + sigmoidV0 * cgPtr->dx[0];
+	cgaPtr->dy[0] = sigmoidV * cgaPtr->dy[0] + sigmoidV0 * cgPtr->dy[0];
 }
 
 

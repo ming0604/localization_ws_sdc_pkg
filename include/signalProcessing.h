@@ -61,7 +61,10 @@ typedef struct CG_Data{
 
 	double dx_r[3] = {0};
 	double dx_r_LPF[3] = {0};
-	double x_r[2] = {0};
+//change start
+	double x_r[2] = {-2.5};
+	// double x_r[2] = {-3.1};
+	// double x_r[2] = {-5.0};
 } CG;
 
 typedef struct Single_Tire_Data{
@@ -82,8 +85,10 @@ typedef struct Tires_Data{
 	//double lf = 0.302;
 	//double lr = 0.310;
 
-	double s[4] = {T_2, -T_2, T_2, -T_2};
-	double l[4] = {-LR, -LR, LF, LF};
+	// double s[4] = {T_2, -T_2, T_2, -T_2};
+	// double l[4] = {-LR, -LR, LF, LF};
+	double s[4] = {-T_2, T_2, -T_2, T_2};
+	double l[4] = {LF, LF, -LR, -LR};
 	double R = TIRE_RADIUS; // tire radius
 	SINGLE_TIRE theTire[4];
 } TIRES;
@@ -110,8 +115,9 @@ int tck2cg(TRACKER tck, CG *cgPtr);
 int amcl2cg(AMCLPOSE *amclPtr, CG *cgaPtr);
 // int amcl2cg(AMCLPOSE *amclPtr, CG *cgaPtr, CG *cgPtr);
 int cg2tires(CG cg, TIRES *tires);
-int signal2cg(TRACKER tck, AMCLPOSE *amclPtr, CG *cgPtr, CG *cgaPtr, double t);
-double sigmoid(double x, double k);
-void smoothTransition(CG *cgPtr, CG *cgaPtr, double t);
+int signal2cg(TRACKER tck, AMCLPOSE *amclPtr, CG *cgPtr, CG *cgaPtr, double t, double trans);
+double sigmoid(double x, double k, double m);
+void smoothTransition_amcl(CG *cgPtr, CG *cgaPtr, AMCLPOSE *amclPtr, double t);
+void smoothTransition_tck(CG *cgPtr, CG *cgaPtr, AMCLPOSE *amclPtr, double t);
 
 #endif
