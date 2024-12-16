@@ -1,0 +1,6 @@
+<launch>
+	<arg name="args_1" default="1"/>
+
+	<node name="amm_node" pkg="sdc" type="amm_node" output="screen" args="$(arg args_1)"/>
+
+</launch>

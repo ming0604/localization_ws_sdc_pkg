@@ -1,0 +1,9 @@
+<launch>
+	<node name="joy_node" pkg="joy" type="joy_node" output="screen">
+    	<param name="joy_node/dev" value="/dev/input/js0"/>
+  	</node>
+
+	<node name="remote" pkg="sdc" type="remoteMode" output="screen"/>
+	<!-- <node pkg="sdc" name="encoder2odom" type="diff_tf.py"/> -->
+	<!-- <node pkg="rviz" name="show_odom" type="rviz" args="-d /home/lab816/agv_ws/src/sdc/rviz/tf.rivz"/> -->
+</launch>

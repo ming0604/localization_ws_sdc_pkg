@@ -1,0 +1,54 @@
+{
+    "devices":[
+        {
+          "name": "hmd_1",
+          "type": "HMD",
+          "serial":""
+        },
+        {
+          "name": "tracking_reference_1",
+          "type": "Tracking Reference",
+          "serial":"LHB-F022C983"
+        },
+        {
+          "name": "tracking_reference_2",
+          "type": "Tracking Reference",
+          "serial": "LHB-5A148213"
+        },
+        {
+          "name": "tracking_reference_3",
+          "type": "Tracking Reference",
+          "serial":"LHB-2172D29F"
+        },
+        {
+          "name": "tracking_reference_4",
+          "type": "Tracking Reference",
+          "serial":"LHB-055A3069"
+        },
+        {
+          "name": "tracking_reference_5",
+          "type": "Tracking Reference",
+          "serial":"LHB-696819BB"
+        },
+        {
+          "name": "tracking_reference_6",
+          "type": "Tracking Reference",
+          "serial":"LHB-FEA694A4"
+        },
+        {
+        "name": "tracking_reference_7",
+        "type": "Tracking Reference",
+        "serial": "LHB-C1EB1918"
+        },
+        {
+          "name": "controller_1",
+          "type": "Controller",
+          "serial":"030000006d0400001fc2000005030000"
+        },
+        {
+          "name": "tracker_1",
+          "type": "Tracker",
+          "serial":"LHR-642F84CA"
+        }
+    ]
+}

@@ -1,0 +1,3 @@
+<launch>
+	<node name="pose_listener" pkg="sdc" type="pose_listener" />
+</launch>

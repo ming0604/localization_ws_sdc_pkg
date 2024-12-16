@@ -1,0 +1,56 @@
+<launch>
+  <!-- <node pkg="rviz" name="show" type="rviz" args="-d /home/lab816/agv_ws/src/sdc/rviz/tf.rviz"/> -->
+	<!--Record T265 & D435-->
+  <arg name="bags_directory" value="/data"/>
+  <!--include file="$(find realsense2_camera)/launch/t265_and_d435.launch)" /-->
+  <arg name="record_prefix" default="agv" />
+  <!-- <node pkg="rosbag" type="record" name="rosbag_record"
+        args="record -o $(arg bags_directory)/$(arg record_prefix)
+          /t265/imu
+          /t265/odom/sample
+          /odom/filtered
+          /tf
+          /tf_static
+          /front_scan
+          /scan
+          /merged_cloud
+          /gt" /> -->
+  <node pkg="rosbag" type="record" name="rosbag_record"
+        args="record -o $(arg bags_directory)/$(arg record_prefix)
+          /t265/odom/sample
+          /t265/imu
+          /tf
+          /tf_static
+          /scan
+          /gt 
+          /freq_pose"/>
+  <!-- <node pkg="rosbag" type="record" name="rosbag_record"
+        args="record -o $(arg bags_directory)/$(arg record_prefix)
+          /t265/odom/sample
+          /tf
+          /tf_static
+          /front_scan
+          /scan
+          /gt
+          /robot_pose 
+          /amcl_pose
+          /amcl_ekf
+          /fuse_pose
+          /cloud" /> -->
+  <!-- <node pkg="rosbag" type="record" name="rosbag_record"
+        args="record -o $(arg bags_directory)/$(arg record_prefix)
+          /tf
+          /tf_static
+          tracker
+          odom_t265
+          amcl_pose
+          proposed" /> -->
+  <!-- <node pkg="rosbag" type="record" name="rosbag_record"
+        args="record -o $(arg bags_directory)/$(arg record_prefix)
+          /t265/odom/sample
+          /tf
+          /tf_static
+          /gt
+          /chatter_step
+          " /> -->
+</launch>

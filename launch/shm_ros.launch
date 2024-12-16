@@ -1,0 +1,3 @@
+<launch>
+	<node name="shm_ros" pkg="sdc" type="shm_ros" />
+</launch>

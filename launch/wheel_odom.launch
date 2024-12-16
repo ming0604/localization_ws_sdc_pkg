@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="sdc" name="encoder" type="wheel_odom"/>
+    <node pkg="sdc" name="encoder2odom" type="diff_tf.py"/>
+    <!-- <node pkg="rviz" name="show_odom" type="rviz" args="-d /home/lab816/Documents/sheng_test/ros_ws/catkin_ws/src/beginner_tutorials/rviz_config/encoder_odom.rviz"/> -->
+</launch>

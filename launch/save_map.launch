@@ -1,0 +1,7 @@
+<launch>
+    <arg name="output" default="screen"/>
+    <arg name="map_path" default="current_area"/> 
+
+    <node name="save_map" pkg="map_server" type="map_saver" args="-f $(find agv_ws)/maps/$(arg map_path)" output="$(arg output)"/>
+ 
+</launch>

@@ -1,0 +1,8 @@
+<launch>
+    <arg name="rvizconfig" default="$(find sdc)/rviz/scan_check.rviz"/>
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+    <node pkg="map_server" type="map_server" name="map_server" args="/home/lab816/agv_ws/src/sdc/maps/1114_map.yaml"/> 
+    <!--<node pkg="map_server" type="map_server" name="map_server" args="/home/lab816/agv_ws/src/sdc/maps/1016_map05.yaml"/>--> 
+    
+
+</launch>  

@@ -1,0 +1,53 @@
+<launch>
+
+  <!-- establish tf -->
+  <!-- map -->
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="map" /> -->
+  <!-- base_link -->
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="base_cg" args="0 0 0 0 0 0 1 base_link cg" /> -->
+
+  <!-- base_link to t265 -->
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="t265_base" args="-0.384698 -0.0085 -0.01725 0 0 0 1 t265_pose_frame base_link" /> -->
+
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="t265_base" args="-0.44686022 0.05750647 -0.01479696 0.00970396 0.0057589 -0.00644669 0.99991598 t265_pose_frame base_link" /> -->
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="t265_base" args="-0.36142 -0.0085 -0.01725 0 0 0 1 t265_pose_frame base_link" /> -->
+  
+  <!-- base_link to d435 -->
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="base_d435" args="0.383698 0.01745 0.0475 0 0 0 1 base_link d435_link" /> -->
+
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="base_d435" args="0.44581403 -0.07078035  0.04871239 0.001278 -0.00693 0.00110101 0.99997508 base_link d435_link" /> -->
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="t265_d435" args="-0.00147879 -0.01990126  0.02734451 0 0 0 1 t265_pose_frame d435_link" /> -->
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="base_d435" args="0.36 0.01745 0.0475 0 0 0 1 base_link d435_link" /> -->
+
+  <!-- base_link to base_lidar -->
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="base_lidar" args="0.3524 0 -0.0534 0 0 3.1415926 base_link laser" /> -->
+  
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="d435_lidar" args="-0.070916 -0.026044 -0.031298 0.496434 -0.496611 0.502263 0.504642 d435_infra1_optical_frame laser" />  -->
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="base_lidar" args="0.414 0 0.0745 0 0 0 1 base_link laser" /> -->
+
+  <!-- base_link to vive -->
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="base_vive" args="-0.19708 -0.131882 0.408 0 0 3.1415926 base_link vive_pose" /> -->
+
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="base_vive" args="-0.0095 -0.1322 0.01765 0 0 0 1 base_link vive_pose" /> -->
+  
+  <!-- odom_frame -->
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="map_odom" args="0 0 0 0 0 0 1 map odom_frame" /> -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="odom_t265" args="0.35525 0.014216 0.01725 0 0 0 1 odom_frame t265_odom_frame" />
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="odom_vive" args="-0.1865 -0.1322 0.399 0 0 0 1 odom_frame vive_odom" /> -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="map_vive" args="-0.1865 -0.1322 0.399 0 0 0 1 map vive_odom" />
+
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="odom_t265" args="0.39225 0.014216 0.01725 0 0 0 1 odom_frame t265_odom_frame" />
+  <node pkg="tf2_ros" type="static_transform_publisher" name="odom_vive" args="-0.1545 -0.1322 0.399 0 0 0 1 odom_frame vive_odom" /> -->
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="odom_vive" args="-0.19708 -0.131882 0.408 0 0 0 1 odom_frame vive_odom" /> -->
+
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="odom_t265" args="0.384698 0.0085 0.01725 0 0 0 1 odom_frame t265_odom_frame" /> -->
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="odom_vive" args="0.384698 0.0085 0.01725 0 0 0 1 odom_frame vive_odom" /> -->
+
+  <!-- wheel -->
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="base_wheel" args="0 0 0 0 0 0 1 base_link wheel_pose" /> -->
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="odom_wheel" args="0 0 0 0 0 0 1 odom_frame wheel_odom" /> -->
+
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="t265_vive" args="-4.57876882e-01 -7.48801739e-02 4.03463481e-04 0.99991598 -0.00644669 -0.0057589 -0.00970393 t265_odom_frame vive_odom" /> -->
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="vive_tf" args="0 0 0 0 0 3.1415926 vive_odom tf" /> -->
+
+</launch>

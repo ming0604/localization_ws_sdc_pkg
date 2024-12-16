@@ -1,0 +1,13 @@
+<launch>
+	<arg name="bag_filename" default="/data/0727_1n.bag"/>
+	<param name="use_sim_time" value="true"/>
+	
+	<node name="icp_node" pkg="sdc" type="icp_node" output="screen"/>
+	
+	<node name="rviz" pkg="rviz" type="rviz" required="false"
+		args="-d $(find sdc)/rviz/localize.rviz" />
+	
+	<node name="playbag" pkg="rosbag" type="play" 
+		args="--clock -r 1 $(arg bag_filename)" />
+		
+</launch>

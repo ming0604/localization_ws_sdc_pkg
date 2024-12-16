@@ -1,0 +1,279 @@
+<?xml version="1.0"?>
+<robot name="mycar" xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <!-- parameters -->
+    <xacro:property name="M_PI" value="3.1415926535897931" />
+    <!-- <xacro:property name="lf" value="0.310"/>
+    <xacro:property name="lb" value="0.302"/> -->
+    <xacro:property name="xt" value="0.043"/>
+    <xacro:property name="lf" value="0.263"/>
+    <xacro:property name="lb" value="0.349"/>
+    <xacro:property name="lw" value="0.55"/>
+    <xacro:property name="tw" value="0.055"/>
+    <xacro:property name="tr" value="0.105"/>
+    <xacro:property name="bl2g" value="0.213416"/>
+    <xacro:property name="bl2w_z" value="0.111777"/>
+    <xacro:property name="bl_x" value="0.820"/>
+    <xacro:property name="bl_y" value="0.466"/>
+    <xacro:property name="bl_z" value="0.006"/>
+    <xacro:property name="carbody_x" value="0.820"/>
+    <xacro:property name="carbody_y" value="0.457"/>
+    <xacro:property name="carbody_z" value="0.101"/>
+    <!-- <xacro:property name="btm2g" value="0.0456"/> -->
+    <!-- <xacro:property name="btm_z" value="0.161816"/> -->
+    <xacro:property name="mesh_scale" value="0.01"/>
+    <xacro:property name="camera_mount_y" value="0.075"/>
+    <xacro:property name="t265_x" value="0.0125"/>
+    <xacro:property name="t265_y" value="0.108"/>
+    <xacro:property name="t265_z" value="0.0245"/>
+    <xacro:property name="vive_x" value="0.080"/>
+    <xacro:property name="vive_y" value="0.080"/>
+    <xacro:property name="vive_z" value="0.025"/>
+    <xacro:property name="bl2vive_z" value="0.374"/>
+
+    <xacro:arg name="use_nominal_extrinsics" default="false"/>
+    <xacro:arg name="add_plug" default="false" />
+    <xacro:arg name="use_mesh" default="true" />
+    <xacro:arg name="transmission_hw_interface" default="hardware_interface/PositionJointInterface" />
+
+    <!-- lidar -->
+    <xacro:include filename="$(find urg_node)/urdf/hokuyo_ust10.urdf.xacro"/>
+
+    <!-- d435 -->
+    <xacro:include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro"/>
+
+    <!-- common stuff -->
+    <xacro:include filename="$(find tm5_description)/urdf/common.gazebo.xacro" />
+
+    <!-- tm5_700 -->
+    <xacro:include filename="$(find tm5_description)/urdf/tm5_700.urdf.xacro" />
+    
+    <!-- link -->
+        <!-- <link name="odom_frame"/>
+        <link name="t265_odom_frame"/> -->
+
+        <!-- middle of car -->
+        <link name="base_link">
+            <visual>
+                <!-- <geometry>
+                    <box size="${bl_x} ${bl_y} ${bl_z}"/>
+                </geometry>
+                <origin rpy="0 0 0 " xyz="0 0 ${-bl_z}"/>
+                <material name="red">
+                    <color rgba="1 0 0 1"/>
+                </material> -->
+                <geometry>
+                    <mesh scale="${mesh_scale} ${mesh_scale} ${mesh_scale}" filename="package://sdc/meshes/carbody.stl" />
+                </geometry>
+                <!-- <origin rpy="${M_PI/2} 0 ${-M_PI/2}" xyz="-0.043 ${-(bl_y-carbody_y)/2} ${-carbody_z}"/> -->
+                <origin rpy="${M_PI/2} 0 ${-M_PI/2}" xyz="${-xt} -0.004 ${-carbody_z}"/>
+                <material name="grey">
+                    <color rgba="0.5 0.5 0.5 1"/>
+                </material>
+                <!-- <material name="red">
+                    <color rgba="1 0 0 1"/>
+                </material> -->
+            </visual>
+        </link>  
+        <!-- <link name="bottom">
+            <visual>
+                <geometry>
+                    <box size="0.686 0.466 ${btm_z}"/>
+                </geometry>
+                <origin rpy="0 0 0" xyz="0 0 ${btm_z/2}"/>
+                <material name="grey">
+                    <color rgba="0.5 0.5 0.5 1"/>
+                </material>
+            </visual>
+        </link> -->
+        <!-- <link name="ground">
+            <visual>
+                <geometry>
+                    <box size="1 1 0"/>
+                </geometry>
+                <material name="white">
+                    <color rgba="1 1 1 1"/>
+                </material>
+            </visual>
+        </link>   -->
+        <!-- <link name="map"/> -->
+        <link name="rf_wheel">
+            <visual>
+                <geometry>
+                    <cylinder length="${tw}" radius="${tr}"/>
+                </geometry>
+                <origin rpy="${M_PI/2} 0 0" xyz="0 0 0"/>
+                <material name="black">
+                    <color rgba="0 0 0 1"/>
+                </material>
+            </visual>
+        </link>   
+        <link name="lf_wheel">
+            <visual>
+                <geometry>
+                    <cylinder length="${tw}" radius="${tr}"/>
+                </geometry>
+                <origin rpy="${M_PI/2} 0 0" xyz="0 0 0"/>
+                <material name="black">
+                    <color rgba="0 0 0 1"/>
+                </material>
+            </visual>
+        </link>  
+        <link name="rb_wheel">
+            <visual>
+                <geometry>
+                    <cylinder length="${tw}" radius="${tr}"/>
+                </geometry>
+                <origin rpy="${M_PI/2} 0 0" xyz="0 0 0"/>
+                <material name="black">
+                    <color rgba="0 0 0 1"/>
+                </material>
+            </visual>
+        </link>  
+        <link name="lb_wheel">
+            <visual>
+                <geometry>
+                    <cylinder length="${tw}" radius="${tr}"/>
+                </geometry>
+                <origin rpy="${M_PI/2} 0 0" xyz="0 0 0"/>
+                <material name="black">
+                    <color rgba="0 0 0 1"/>
+                </material>
+            </visual>
+        </link>  
+
+        <!-- <link name="laser"/> -->
+
+        <xacro:hokuyo_ust10_mount prefix="" topic="scan" parent_link="base_link">
+            <origin rpy="${M_PI} 0 0" xyz="${bl_x/2 - 0.015 - xt} 0 ${-bl_z}"  />
+        </xacro:hokuyo_ust10_mount>
+
+        <xacro:hokuyo_ust10_mount prefix="back_" topic="scan" parent_link="base_link">
+            <origin rpy="${M_PI} 0 ${M_PI}" xyz="${-(bl_x/2 - 0.015 + xt)} 0 ${-bl_z}"  />
+        </xacro:hokuyo_ust10_mount>
+
+        <link name="camera_mount">
+            <visual>
+                <geometry>
+                    <mesh scale="${mesh_scale} ${mesh_scale} ${mesh_scale}" filename="package://sdc/meshes/part1.stl" />
+                </geometry>
+                <origin rpy="${M_PI/2} 0 0" xyz="${-xt} ${camera_mount_y/2} 0"/>
+                <material name="grey">
+                    <color rgba="0.5 0.5 0.5 1"/>
+                </material>
+            </visual>
+        </link>
+
+        <link name="t265_pose_frame">
+            <visual>
+                <geometry>
+                    <mesh scale="${mesh_scale} ${mesh_scale} ${mesh_scale}" filename="package://sdc/meshes/t265.stl" />
+                </geometry>
+                <origin rpy="${M_PI/2} 0 0" xyz="${-t265_x/2} -0.009216 0"/>
+                <material name="">
+                    <color rgba="0.8 0.8 0.8 1"/>
+                </material>
+            </visual>
+        </link>
+
+        <xacro:sensor_d435 parent="camera_mount" name="d435" use_nominal_extrinsics="$(arg use_nominal_extrinsics)" add_plug="$(arg add_plug)" use_mesh="$(arg use_mesh)">
+            <origin rpy="0 0 0" xyz="${0.019919 - xt} 0.001 0.035"/>
+        </xacro:sensor_d435>
+
+        <link name="vive_pose">
+            <visual>
+                <geometry>
+                    <mesh scale="${mesh_scale/10} ${mesh_scale/10} ${mesh_scale/10}" filename="package://sdc/meshes/HTC_Vive_Tracker_2017.obj" />
+                </geometry>
+                <origin rpy="0 0 0" xyz="0 -0.00355 0"/>
+            </visual>
+        </link>
+
+
+        <xacro:tm5_700_robot prefix="tm_" joint_limited="true" stl_mesh="false"/>
+    
+
+    <!-- joint -->
+        <!-- <joint name="odom_joint" type="fixed">
+            <parent link="odom_frame"/>
+            <child link="t265_odom_frame"/>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+        </joint>  -->
+        <!-- <joint name="ground_joint" type="fixed">
+            <parent link="base_link"/>
+            <child link="ground"/>
+            <origin rpy="0 0 0" xyz="0 0 ${-bl2g}"/>
+        </joint> -->
+        <!-- <joint name="map_joint" type="fixed">
+            <parent link="map"/>
+            <child link="base_link"/>
+            <origin rpy="0 0 0" xyz="0 0 ${bl2g}"/>
+        </joint> -->
+
+        <!-- <joint name="bottom_joint" type="fixed">
+            <parent link="ground"/>
+            <child link="bottom"/>
+            <origin rpy="0 0 0" xyz="0 0 ${btm2g}"/>
+        </joint> -->
+        
+        <joint name="rf_joint" type="fixed">
+            <parent link="base_link"/>
+            <child link="rf_wheel"/>
+            <origin rpy="0 0 0" xyz="${lf} ${lw/2} ${-bl2w_z}"/>
+        </joint>
+
+        <joint name="lf_joint" type="fixed">
+            <parent link="base_link"/>
+            <child link="lf_wheel"/>
+            <origin rpy="0 0 0" xyz="${lf} ${-lw/2} ${-bl2w_z}"/>
+        </joint>
+        
+        <joint name="rb_joint" type="fixed">
+            <parent link="base_link"/>
+            <child link="rb_wheel"/>
+            <origin rpy="0 0 0" xyz="${-lb} ${lw/2} ${-bl2w_z}"/>
+        </joint>
+
+        <joint name="lb_joint" type="fixed">
+            <parent link="base_link"/>
+            <child link="lb_wheel"/>
+            <origin rpy="0 0 0" xyz="${-lb} ${-lw/2} ${-bl2w_z}"/>
+        </joint>
+
+        <joint name="camera_mount_joint" type="fixed">
+            <parent link="base_link"/>
+            <child link="camera_mount"/>
+            <origin rpy="0 0 0" xyz="${bl_x/2 - xt} 0.005 0"/>
+        </joint>
+
+        <joint name="t265_pose_frame_joint" type="fixed">
+            <parent link="t265_pose_frame"/>
+            <child link="base_link"/>
+            <origin rpy="0 0 0" xyz="${-(t265_x/2 + bl_x/2 - 0.018 - xt)} -0.014216 ${-(t265_z/2+0.005)}"/>
+        </joint>
+
+        <!-- <joint name="t265_pose_frame_joint" type="fixed">
+            <parent link="camera_mount"/>
+            <child link="t265_pose_frame"/>
+            <origin rpy="0 0 0" xyz="${t265_x/2+0.024} 0.009216 ${t265_z/2+0.005}"/>
+        </joint> -->
+
+        <joint name="vive_joint" type="fixed">
+            <parent link="base_link" />
+            <child link="vive_pose" />
+            <!-- <origin rpy="0 0 0" xyz="${-(bl_x/2 - vive_x/2 - 0.2155 + xt)} ${-(bl_y/2 - vive_y/2 - 0.0608)} ${bl2vive_z+vive_z}" /> -->
+            <origin rpy="0 0 0" xyz="${-(bl_x/2 - vive_x/2 - 0.2265 + xt)} ${-(bl_y/2 - vive_y/2 - 0.0608)} ${bl2vive_z+vive_z}" />
+        </joint>
+
+        <joint name="tm_joint" type="fixed">
+            <parent link="base_link" />
+            <child link="tm_base" />
+            <origin rpy="0 0 0" xyz="${bl_x/2-0.135 - xt} 0 0" />
+        </joint>
+
+        <!-- <joint name="laser_joint" type="fixed">
+            <parent link="base_link"/>
+            <child link="laser"/>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+        </joint> -->
+</robot>

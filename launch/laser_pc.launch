@@ -1,0 +1,3 @@
+<launch>
+	<node name="laser_pc" pkg="sdc" type="laser_pc" output="screen"/>
+</launch>

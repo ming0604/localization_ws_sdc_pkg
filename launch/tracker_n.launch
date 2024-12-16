@@ -1,0 +1,5 @@
+<launch>
+
+	<node name="tracker_n" pkg="sdc" type="tracker_n" output="screen"/>
+
+</launch>

@@ -1,0 +1,5 @@
+<launch>
+
+	<node name="sync_scan" pkg="sdc" type="sync_scan" output="screen"/>
+
+</launch>
