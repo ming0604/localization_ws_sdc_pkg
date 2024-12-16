@@ -95,7 +95,7 @@ class Tracker{
 			cali_trans.setZero();
 
 			gt_pub = n.advertise<nav_msgs::Odometry>("gt", 10);
-			// b_gt_pub = n.advertise<nav_msgs::Odometry>("b_gt", 10);
+			b_gt_pub = n.advertise<nav_msgs::Odometry>("base_gt_odom", 10);
 
 			timer = n.createTimer(ros::Duration(0.01), &Tracker::timerCallback, this);
 		}
@@ -179,7 +179,7 @@ class Tracker{
 			// }
 
 			nav_msgs::Odometry gt;
-			// nav_msgs::Odometry b_gt;
+			nav_msgs::Odometry b_gt;
 			tf::Matrix3x3 rotate, rraw, identity;
 			identity.setValue(1,0,0,
 							  0,1,0,
@@ -195,7 +195,7 @@ class Tracker{
 			// 									    , rotate[2][0],rotate[2][1],rotate[2][2]);
 			tf::Quaternion b_gt_quat, id_quat;
 			geometry_msgs::Quaternion gt_qmsg, b_gt_qmsg, id_qmsg;
-			double r,p,y,r1,p1,y1;
+			double r,p,y,r1,p1,y1,r_gt,p_gt,y_gt;
 			rotate.getRPY(r,p,y);
 			rraw.getRPY(r1,p1,y1);
 			rotate.getRotation(gt_quat);
@@ -204,8 +204,12 @@ class Tracker{
 			quaternionTFToMsg(gt_quat, gt_qmsg);
 			quaternionTFToMsg(id_quat, id_qmsg);
 
-			// b_gt_quat.setRPY(0,0,cg.psi);
-			// quaternionTFToMsg(b_gt_quat, b_gt_qmsg);
+			b_gt_quat.setRPY(0,0,cg.psi);
+			quaternionTFToMsg(b_gt_quat, b_gt_qmsg);
+			//for output
+			tf::Matrix3x3(b_gt_quat).getRPY(r_gt,p_gt,y_gt);
+			
+
 
 			gt.header.stamp = current_time;
 			gt.header.frame_id = "vive_odom";
@@ -241,38 +245,38 @@ class Tracker{
 
 			gt_pub.publish(gt);
 
-			// b_gt.header.stamp = current_time;
-			// b_gt.header.frame_id = "odom_frame";
-			// b_gt.child_frame_id = "base_link";
+			b_gt.header.stamp = current_time;
+			b_gt.header.frame_id = "map";
+			b_gt.child_frame_id = "base_link";
 			//set the position
-			// b_gt.pose.pose.position.x = cg.x;
-			// b_gt.pose.pose.position.y = cg.y;
-			// b_gt.pose.pose.position.z = 0;
-			// b_gt.pose.pose.orientation = b_gt_qmsg;
-			// b_gt.pose.covariance[0] = 0.1;
-			// b_gt.pose.covariance[7] = 0.1;
-			// b_gt.pose.covariance[14] = 0.1;
-			// b_gt.pose.covariance[21] = 0.001;
-			// b_gt.pose.covariance[28] = 0.001;
-			// b_gt.pose.covariance[35] = 0.001;
+			b_gt.pose.pose.position.x = cg.x;
+			b_gt.pose.pose.position.y = cg.y;
+			b_gt.pose.pose.position.z = 0;
+			b_gt.pose.pose.orientation = b_gt_qmsg;
+			b_gt.pose.covariance[0] = 0.1;
+			b_gt.pose.covariance[7] = 0.1;
+			b_gt.pose.covariance[14] = 0.1;
+			b_gt.pose.covariance[21] = 0.001;
+			b_gt.pose.covariance[28] = 0.001;
+			b_gt.pose.covariance[35] = 0.001;
 
 			//set the velocity
-			// b_gt.twist.twist.linear.x = cg.dx[0];
-			// b_gt.twist.twist.linear.y = cg.dy[0];
-			// b_gt.twist.twist.linear.z = 0;
+			b_gt.twist.twist.linear.x = cg.dx[0];
+			b_gt.twist.twist.linear.y = cg.dy[0];
+			b_gt.twist.twist.linear.z = 0;
 
 			//set the velocity
-			// b_gt.twist.twist.angular.x = tck.angVel[0];
-			// b_gt.twist.twist.angular.y = tck.angVel[1];
-			// b_gt.twist.twist.angular.z = tck.angVel[2];
-			// b_gt.twist.covariance[0] = 0.1;
-			// b_gt.twist.covariance[7] = 0.1;
-			// b_gt.twist.covariance[14] = 0.1;
-			// b_gt.twist.covariance[21] = 0.001;
-			// b_gt.twist.covariance[28] = 0.001;
-			// b_gt.twist.covariance[35] = 0.001;
+			b_gt.twist.twist.angular.x = tck.angVel[0];
+			b_gt.twist.twist.angular.y = tck.angVel[1];
+			b_gt.twist.twist.angular.z = tck.angVel[2];
+			b_gt.twist.covariance[0] = 0.1;
+			b_gt.twist.covariance[7] = 0.1;
+			b_gt.twist.covariance[14] = 0.1;
+			b_gt.twist.covariance[21] = 0.001;
+			b_gt.twist.covariance[28] = 0.001;
+			b_gt.twist.covariance[35] = 0.001;
 
-			// b_gt_pub.publish(b_gt);
+			b_gt_pub.publish(b_gt);
 
 			if (cnt%100 == 0){
 				printf("sec: %d ", (int)sec);
@@ -283,8 +287,10 @@ class Tracker{
 				printf("  raw: %f %f %f\n", tck.poseRaw[0][3],tck.poseRaw[1][3],tck.poseRaw[2][3]);
 				printf("  trs: %f %f %f\n", tck.pose[0][3],tck.pose[1][3],tck.pose[2][3]);
 				printf("   gt: %f %f %f\n", gt.pose.pose.position.x,gt.pose.pose.position.y,gt.pose.pose.position.z);
-				printf("  gt yaw: %f\n", tf::getYaw(gt.pose.pose.orientation));
+				//printf("  gt yaw: %f\n", tf::getYaw(gt.pose.pose.orientation));
 				printf("  gt roll: %f, gt pitch: %f, gt yaw: %f\n", r,p,y);
+				printf("  base_gt_odom: %f %f %f\n", b_gt.pose.pose.position.x,b_gt.pose.pose.position.y,b_gt.pose.pose.position.z);
+				printf("  base_gt_odom roll: %f, pitch: %f, yaw: %f\n", r_gt,p_gt,y_gt);
 				// printf(" odom: %f %f %f\n", odom_trans.getX(), odom_trans.getY(), odom_trans.getZ());
 				// printf(" cali: %f %f %f\n", cali_trans.getX(), cali_trans.getY(), cali_trans.getZ());
 				// printf("origin %f\n",sqrt((pow(odom_trans.getX(),2)+pow(odom_trans.getY(),2))/2));
@@ -316,7 +322,7 @@ class Tracker{
 		ros::Timer timer;
 		ros::Time current_time;
 		ros::Publisher gt_pub;
-		// ros::Publisher b_gt_pub;
+		ros::Publisher b_gt_pub;
 		tf::TransformListener listener;
 		tf::StampedTransform vive_t265;
 		tf::StampedTransform transform;
