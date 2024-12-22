@@ -1,0 +1,7 @@
+image: /home/lab816/agv_ws/src/sdc/maps/20241219_vive_mapping.pgm
+resolution: 0.025000
+origin: [-18.487500, -12.512500, -nan]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196
+
