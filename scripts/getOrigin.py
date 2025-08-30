@@ -4,7 +4,7 @@ import triad_openvr
 import pyUtilities as uty
 
 # v = triad_openvr.triad_openvr()
-v = triad_openvr.triad_openvr("/home/lab816/agv_ws/src/sdc/scripts/config.json")
+v = triad_openvr.triad_openvr("/home/lab816/localization_ws/src/sdc/scripts/config.json")
 v.print_discovered_objects()
 
 poseList = uty.matrix2List(v.devices["tracker_1"].get_pose_matrix())
@@ -27,8 +27,8 @@ print(poseInv)
 # print(poseInv_)
 
 
-fd = open("/home/lab816/Desktop/amm_demo/py/T0inv.txt","w")
-# fd = open("/home/lab816/agv_ws/src/sdc/scripts/T0inv.txt","w")
+fd = open("/home/lab816/high_precision_amr/controller/my_amm_demo/py/T0inv.txt","w")
+# fd = open("/home/lab816/localization_ws/src/sdc/scripts/T0inv.txt","w")
 txt = ""
 for row in poseInv:
 	for each in row:

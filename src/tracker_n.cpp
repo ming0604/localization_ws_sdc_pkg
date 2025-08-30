@@ -630,7 +630,7 @@ int main(int argc, char **argv){
 
 	// ================== read inverse origin ===================
 	memset(T0invStr, 0, sizeof(char)*256);
-	if (readT0inv("/home/lab816/Desktop/amm_demo/py/T0inv.txt", T0invStr) == 0){
+	if (readT0inv("/home/lab816/high_precision_amr/controller/my_amm_demo/py/T0inv.txt", T0invStr) == 0){
 		printf("cannot read scripts/T0inv.txt\n");
 		return 0;
 	}
