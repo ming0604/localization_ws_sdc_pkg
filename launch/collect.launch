@@ -22,7 +22,8 @@
           /tf
           /tf_static
           /scan
-          /gt 
+          /gt
+          /base_gt_odom
           /freq_pose"/>
   <!-- <node pkg="rosbag" type="record" name="rosbag_record"
         args="record -o $(arg bags_directory)/$(arg record_prefix)
