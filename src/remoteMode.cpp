@@ -219,8 +219,8 @@ class Wodom{
             //msg_lwheel.data = lwheel;
             wheel.data.push_back(lwheel);
             wheel.data.push_back(rwheel);
-			// wheel.data.push_back(lf);
-			// wheel.data.push_back(rf);
+			wheel.data.push_back(lf);
+			wheel.data.push_back(rf);
             chatter_pub.publish(wheel);
         }
 
