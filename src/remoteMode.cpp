@@ -190,6 +190,7 @@ class Joy{
 			voltage2pulseWidth(voltage, pulseWidth, direction);
 	        outputPwmDir(pulseWidth, poChannel, direction, instantDoCtrl);
 			printf("(lf, rf, lb, rb, g, d) = %f %f %f %f %d %d\n", voltage[0], voltage[1], voltage[2], voltage[3], speed_g, speed_d);
+			printf("(lo[0], lo[1], lo[2], lo[3]) = %f %f %f %f\n", pulseWidth[0].LoPeriod, pulseWidth[1].LoPeriod, pulseWidth[2].LoPeriod, pulseWidth[3].LoPeriod);
 		}
 	private:
 		ros::NodeHandle n;
@@ -432,10 +433,14 @@ int daqInit(void)
 		DeviceInformation devInfo1884_0(deviceDescription1884_0);
 		DeviceInformation devInfo1884_1(deviceDescription1884_1);
 		DeviceInformation devInfo1730(deviceDescription1730);
-		ret = pwModulatorCtrl->setSelectedDevice(devInfo1884_0);
-		CHK_RESULT(ret);
+
+		ROS_INFO("Initializing PCIE-1884,BID#1 for Counter...");
 		ret = udCounterCtrl->setSelectedDevice(devInfo1884_1);
 		CHK_RESULT(ret);
+		ROS_INFO("Initializing PCIE-1884,BID#0 for PWM...");
+		ret = pwModulatorCtrl->setSelectedDevice(devInfo1884_0);
+		CHK_RESULT(ret);
+		ROS_INFO("Initializing PCI-1730,BID#0 for Digital I/O...");
 		ret = instantDoCtrl->setSelectedDevice(devInfo1730);
 		CHK_RESULT(ret);
 		ret = pwModulatorCtrl->setChannelStart(0);
