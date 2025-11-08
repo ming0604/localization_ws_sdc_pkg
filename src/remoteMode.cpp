@@ -229,8 +229,15 @@ class Wodom{
 			int  cnt[4] = {0}; // for Read(int32 count, int32 *data)
 			int  temp;
 			long dif;    // 8 Bytes  (cntNew, cntOld are 4 Bytes int)
-
-			udCounterCtrl->Read(4, cnt); //read QEP
+			
+			ErrorCode ret_encoder = Success;
+			ret_encoder = udCounterCtrl->Read(4, cnt); //read QEP
+			// If something wrong in this execution, print the error code on screen for tracking.
+			if(BioFailed(ret_encoder)){
+				wchar_t enumString[256];
+				AdxEnumToString(L"ErrorCode", (int32)ret_encoder, 256, enumString);
+				ROS_ERROR("Some error occurred in Wodom::getTiresOmega. And the last error code is 0x%X. [%ls]\n", ret_encoder, enumString);
+			}
 
 			for(i=0; i<4; ++i){
 				//tPtr->theTire[i].cntOld = tPtr->theTire[i].cntNew;
@@ -519,11 +526,25 @@ int voltage2pulseWidth(double voltage[4], PulseWidth *pulseWidth, uint8 directio
 //                    outputPwmDir
 //====================================================
 int outputPwmDir(PulseWidth pulseWidth[4], Array<PoChannel> *poChannel, uint8 direction[4], InstantDoCtrl *instantDoCtrl)
-{
+{	
+	ErrorCode ret_dir = Success;
+    ErrorCode ret_pwm = Success;
 	int i;
 	for(i=0; i<4; i++){
-		instantDoCtrl->WriteBit(2, i+4, direction[i]);
-		poChannel->getItem(i).setPulseWidth(pulseWidth[i]);
+		ret_dir = instantDoCtrl->WriteBit(2, i+4, direction[i]);
+			
+		if(BioFailed(ret_dir)){
+			wchar_t enumString[256];
+			AdxEnumToString(L"ErrorCode", (int32)ret_dir, 256, enumString);
+			ROS_ERROR("Some error occurred in outputPwmDir's direction control of motor %d. And the last error code is 0x%X. [%ls]\n", i, ret_dir, enumString);
+		}
+
+		ret_pwm = poChannel->getItem(i).setPulseWidth(pulseWidth[i]);
+		if(BioFailed(ret_pwm)){
+			wchar_t enumString[256];
+			AdxEnumToString(L"ErrorCode", (int32)ret_pwm, 256, enumString);
+			ROS_ERROR("Some error occurred in outputPwmDir's PWM output of motor %d. And the last error code is 0x%X. [%ls]\n", i, ret_pwm, enumString);
+		}
 	}
 	return 1;
 }
