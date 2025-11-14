@@ -3,6 +3,7 @@
 #include <string.h>
 #include <math.h>
 #include <unistd.h>
+#include <signal.h>
 #include <ros/ros.h>
 #include <sstream>
 #include "std_msgs/Int32MultiArray.h"
@@ -25,6 +26,10 @@
 #define  DUTY_CYCLE               0.002 // 500 Hz PWM
 #define  DEADZONE                 0.005 // 0.5% deadzone
 
+#define ANSI_COLOR_RED     "\x1b[31m"
+#define ANSI_COLOR_GREEN   "\x1b[32m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
+
 using namespace Automation::BDaq;
 
 // =============== functions ===================
@@ -33,7 +38,7 @@ int emergencyStop();
 int daqInit(void); // initialization of PWM, QEP, DO
 int voltage2pulseWidth(double voltage[4], PulseWidth *pulseWidth, uint8 direction[4]);
 int outputPwmDir(PulseWidth pulseWidth[4], Array<PoChannel> *poChannel, uint8 direction[4], InstantDoCtrl *instantDoCtrl);
-
+void core_dump_handler(int signum);
 // ================ globals ====================
 ErrorCode        ret = Success;
 PwModulatorCtrl  *pwModulatorCtrl = PwModulatorCtrl::Create();
@@ -48,7 +53,7 @@ uint8      direction[4] = {1,0,1,0};
 double     voltage[4] = {0.0,0.0,0.0,0.0};	//(lf, rf, lb, rb)
 double 	   v, a;
 int 	   speed_g, speed_d;
-
+int        istop = 0;
 class Joy{
 	public:
 		Joy(){
@@ -294,6 +299,12 @@ class Wodom{
 
 int main(int argc, char **argv){
 	
+	signal(SIGSEGV, core_dump_handler);
+	signal(SIGABRT, core_dump_handler);
+	signal(SIGFPE, core_dump_handler);
+	signal(SIGILL, core_dump_handler);
+	signal(SIGBUS, core_dump_handler);
+
 	ros::init(argc, argv, "Remote");
 	Joy remoter;
 	Wodom talker;
@@ -440,12 +451,11 @@ int daqInit(void)
 		DeviceInformation devInfo1884_0(deviceDescription1884_0);
 		DeviceInformation devInfo1884_1(deviceDescription1884_1);
 		DeviceInformation devInfo1730(deviceDescription1730);
-
-		ROS_INFO("Initializing PCIE-1884,BID#1 for Counter...");
-		ret = udCounterCtrl->setSelectedDevice(devInfo1884_1);
-		CHK_RESULT(ret);
 		ROS_INFO("Initializing PCIE-1884,BID#0 for PWM...");
 		ret = pwModulatorCtrl->setSelectedDevice(devInfo1884_0);
+		CHK_RESULT(ret);
+		ROS_INFO("Initializing PCIE-1884,BID#1 for Counter...");
+		ret = udCounterCtrl->setSelectedDevice(devInfo1884_1);
 		CHK_RESULT(ret);
 		ROS_INFO("Initializing PCI-1730,BID#0 for Digital I/O...");
 		ret = instantDoCtrl->setSelectedDevice(devInfo1730);
@@ -549,4 +559,30 @@ int outputPwmDir(PulseWidth pulseWidth[4], Array<PoChannel> *poChannel, uint8 di
 	return 1;
 }
 
+//====================================================
+//                     core_dump_handler()
+//====================================================
+void core_dump_handler(int signum){
+	FILE *log_file;
+	char buffer[256];
 
+	printf(ANSI_COLOR_RED "[Core dumped!!]\n" ANSI_COLOR_RESET);
+
+	istop = emergencyStop();
+	for(int index=0; index<4; index++){
+		voltage[index] = 0.0;
+	}
+
+	log_file = fopen("core_dump.log", "a");
+	if(log_file == NULL){
+		perror("Failed to open log file");
+		exit(EXIT_FAILURE);
+	}
+
+	snprintf(buffer, sizeof(buffer), "Core dumped! Signal number: %d\n", signum);
+	fputs(buffer, log_file);
+
+	fclose(log_file);
+
+	exit(EXIT_FAILURE);
+}
