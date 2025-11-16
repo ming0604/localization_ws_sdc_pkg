@@ -17,6 +17,8 @@
 
 #include "signalProcessing.h"
 
+#include "sdc/FourWheelsData.h"
+
 #define  PI 3.1415926
 
 #define  deviceDescription1884_0  L"PCIE-1884,BID#0"
@@ -26,6 +28,7 @@
 #define  DUTY_CYCLE               0.002 // 500 Hz PWM
 #define  DEADZONE                 0.005 // 0.5% deadzone
 
+#define MAX_TIRE_ANGULAR_VELOCITY_THRESHOLD 50.0  // maximum angular velocity threshold(rad/s) for rushing detection
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
@@ -54,6 +57,7 @@ double     voltage[4] = {0.0,0.0,0.0,0.0};	//(lf, rf, lb, rb)
 double 	   v, a;
 int 	   speed_g, speed_d;
 int        istop = 0;
+int 	   consecutive_cnt_error = 0;
 class Joy{
 	public:
 		Joy(){
@@ -205,10 +209,7 @@ class Joy{
 class Wodom{
 	public:
 		Wodom(){
-			lwheel = 0;
-			rwheel = 0;
-			lf = 0;
-			rf = 0;
+
 			tiresPtr = &tires;
 		}
 
@@ -218,7 +219,8 @@ class Wodom{
         }
 
         void callback(const ros::TimerEvent& e){
-            std_msgs::Int32MultiArray wheel;
+			/*           
+			std_msgs::Int32MultiArray wheel;
             wheel.data.clear();
             getTiresOmega(tiresPtr);
             //msg_lwheel.data = lwheel;
@@ -226,7 +228,36 @@ class Wodom{
             wheel.data.push_back(rwheel);
 			wheel.data.push_back(lf);
 			wheel.data.push_back(rf);
-            chatter_pub.publish(wheel);
+            chatter_pub.publish(wheel); 
+			*/
+
+			sdc::FourWheelsData wheels;
+			int getTiresOmega_result;
+			// record time stamp
+			wheels.header.stamp = ros::Time::now();
+	
+			getTiresOmega_result = getTiresOmega(tiresPtr);
+
+			// record counts and angular velocities of four tires
+			wheels.counts[0] = tires.theTire[0].cntNew;
+			wheels.counts[1] = tires.theTire[1].cntNew;
+			wheels.counts[2] = tires.theTire[2].cntNew;
+			wheels.counts[3] = tires.theTire[3].cntNew;
+			wheels.angular_velocities[0] = tires.theTire[0].omegaLPF[0];
+			wheels.angular_velocities[1] = tires.theTire[1].omegaLPF[0];
+			wheels.angular_velocities[2] = tires.theTire[2].omegaLPF[0];
+			wheels.angular_velocities[3] = tires.theTire[3].omegaLPF[0];
+			// publish the message
+			wheels_data_pub.publish(wheels);
+
+			// if getTiresOmega returns -1, it means some error occurs and emergency stop has been activated
+			if(getTiresOmega_result == -1)
+			{
+				// stop the timer to prevent further reading
+				timer1.stop();
+				ROS_ERROR("closing the timer in Wodom::callback and then shut down the node.");
+				exit(EXIT_FAILURE);
+			}
         }
 
         int getTiresOmega(TIRES *tPtr){
@@ -245,9 +276,8 @@ class Wodom{
 			}
 
 			for(i=0; i<4; ++i){
-				//tPtr->theTire[i].cntOld = tPtr->theTire[i].cntNew;
+				tPtr->theTire[i].cntOld = tPtr->theTire[i].cntNew;
 				tPtr->theTire[i].cntNew = cnt[i];
-				/*
 				dif = (long)(tPtr->theTire[i].cntNew - tPtr->theTire[i].cntOld);
 				//============= over float checking ==============
 				if (dif > 100000){
@@ -265,19 +295,81 @@ class Wodom{
 				tPtr->theTire[i].omega[0] = dif*0.00615817436751895; //  1/10000*2*pi/0.01/10.203 = 0.00615817436751895
 				LPfilter(tPtr->theTire[i].omega, tPtr->theTire[i].omegaLPF);
 				//printf("%d %ld\t", i, (long)(tPtr->theTire[i].cntNew));
-				*/
-
+				
 			}
-			lwheel = tPtr->theTire[0].cntNew;
-			rwheel = tPtr->theTire[1].cntNew;
-			lf = tPtr->theTire[2].cntNew;
-			rf = tPtr->theTire[3].cntNew;
+			// ========== check tire safety ==========
+			if(tire_safety_check(tPtr) == -1)
+			{
+				// not safe, emergency stop
+				ROS_ERROR("activating emergency stop!");
+				istop = emergencyStop();
+				return -1;
+			}
+			else
+			{
+				// safe, return 1
+				return 1;
+			}
+
 			// printf("%d %d %d %d\n", cnt[0], cnt[1], cnt[2], cnt[3]);
 			// printf("%d %d %d %d\n", tPtr->theTire[0].cntNew, tPtr->theTire[1].cntNew, tPtr->theTire[2].cntNew, tPtr->theTire[3].cntNew);
 			
 			// printf("\n");
 				
-			return 1;
+			// return 1;
+		}
+
+		int tire_safety_check(TIRES *tPtr)
+		{
+			bool ang_vel_too_high = false;
+			bool cnt_error = false;
+			bool cnt_all_negative_one = true;
+
+			// 1. check if any tire's angular velocity is over the threshold
+			for(int i=0; i<4; i++)
+			{
+				if(fabs(tPtr->theTire[i].omegaLPF[0]) > MAX_TIRE_ANGULAR_VELOCITY_THRESHOLD)
+				{
+					ang_vel_too_high = true;
+					ROS_ERROR("Tire %d angular velocity is %f (rad/s), which is over the threshold %f (rad/s)!", i, tPtr->theTire[i].omegaLPF[0], MAX_TIRE_ANGULAR_VELOCITY_THRESHOLD);
+				}
+			}
+
+			// 2. check if all tires' encoder counts are -1
+			for(int i=0; i<4; i++)
+			{
+				if(tPtr->theTire[i].cntNew != -1)
+				{
+					cnt_all_negative_one = false;
+					break;
+				}
+			}
+			// if all tires' encoder counts are -1, increase the consecutive count error variable
+			if(cnt_all_negative_one)
+			{	
+				consecutive_cnt_error++;
+				ROS_WARN("Warning: All encoder counts are -1 (consecutive count: %d/3)", consecutive_cnt_error);
+				if(consecutive_cnt_error >= 3) // if reach 3 consecutive times, set the count error flag
+				{
+					cnt_error = true;
+					ROS_ERROR("All encoder counts are -1 for 3 consecutive times!");
+				}
+			}
+			else // if not all -1, reset the consecutive count error variable
+			{
+				consecutive_cnt_error = 0; 
+			}
+
+			// 3. if any of the two error flags is true, return -1 (not safe); else return 1 (safe)
+			if(ang_vel_too_high || cnt_error)
+			{
+				ROS_ERROR("Tire is not safe!");
+				return -1;
+			}
+			else
+			{
+				return 1;
+			}
 		}
         
         // void timer_start(){ 	
@@ -285,13 +377,10 @@ class Wodom{
         // }
 
     private:
-        int lwheel, rwheel;
-		int lf, rf;
-
         TIRES  tires, *tiresPtr;
         ros::NodeHandle n;
-        ros::Publisher chatter_pub = n.advertise<std_msgs::Int32MultiArray>("wheel", 100);
-
+        // ros::Publisher chatter_pub = n.advertise<std_msgs::Int32MultiArray>("wheel", 100);
+		ros::Publisher wheels_data_pub = n.advertise<sdc::FourWheelsData>("wheel", 100);
         ros::Timer timer1;
         
 };
