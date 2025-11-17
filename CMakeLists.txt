@@ -266,9 +266,10 @@ target_link_libraries(tracker_n ${catkin_LIBRARIES} signalProcessing)
 
 add_executable(remoteMode src/remoteMode.cpp)
 target_link_libraries(remoteMode ${catkin_LIBRARIES} signalProcessing -lbiodaq)
+add_dependencies(remoteMode ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
-add_executable(amm_node src/amm_node.cpp)
-target_link_libraries(amm_node ${catkin_LIBRARIES} signalProcessing kkt lowerLayer upperLayer -lbiodaq -larmadillo -pthread)
+#add_executable(amm_node src/amm_node.cpp)
+#target_link_libraries(amm_node ${catkin_LIBRARIES} signalProcessing kkt lowerLayer upperLayer -lbiodaq -larmadillo -pthread)
 
 add_executable(vive_initial_pose src/vive_initial_pose.cpp)
 target_link_libraries(vive_initial_pose ${catkin_LIBRARIES})
