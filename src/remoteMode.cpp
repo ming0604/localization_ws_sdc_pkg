@@ -28,7 +28,7 @@
 #define  DUTY_CYCLE               0.002 // 500 Hz PWM
 #define  DEADZONE                 0.005 // 0.5% deadzone
 
-#define MAX_TIRE_ANGULAR_VELOCITY_THRESHOLD 50.0  // maximum angular velocity threshold(rad/s) for rushing detection
+#define MAX_TIRE_ANGULAR_VELOCITY_THRESHOLD 25.0  // maximum angular velocity threshold(rad/s) for rushing detection
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
@@ -297,6 +297,7 @@ class Wodom{
 				//printf("%d %ld\t", i, (long)(tPtr->theTire[i].cntNew));
 				
 			}
+			//printf("omega:%.3f, %.3f, %.3f, %.3f\n", tPtr->theTire[0].omega[0], tPtr->theTire[1].omega[0], tPtr->theTire[2].omega[0], tPtr->theTire[3].omega[0]);
 			// ========== check tire safety ==========
 			if(tire_safety_check(tPtr) == -1)
 			{
@@ -397,6 +398,8 @@ int main(int argc, char **argv){
 	ros::init(argc, argv, "Remote");
 	Joy remoter;
 	Wodom talker;
+	// sleep 0.5 sec to wait subscriber and publisher to be ready
+	ros::Duration(0.5).sleep();
 	talker.timer_start();
 	// char   c;  // use to catch emergencyStop
  //    double v;
