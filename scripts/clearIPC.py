@@ -15,3 +15,7 @@ print('shm_ros is cleared.')
 semros = ipc.Semaphore(999, ipc.IPC_CREAT)
 semros.remove()
 print('sem_ros is cleared.')
+
+semrendezvous = ipc.Semaphore(555, ipc.IPC_CREAT)
+semrendezvous.remove()
+print('sem_rendezvous is cleared.')
