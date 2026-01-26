@@ -23,12 +23,13 @@
 
 #define  deviceDescription1884_0  L"PCIE-1884,BID#0"
 #define  deviceDescription1884_1  L"PCIE-1884,BID#1"
-#define  deviceDescription1730    L"PCI-1730,BID#0"
+// #define  deviceDescription1730    L"PCI-1730,BID#0"
+#define  deviceDescription1730    L"PCIE-1730,BID#0"
 #define  TS                       0.01  // sampling time (sec)
 #define  DUTY_CYCLE               0.002 // 500 Hz PWM
 #define  DEADZONE                 0.005 // 0.5% deadzone
 
-#define MAX_TIRE_ANGULAR_VELOCITY_THRESHOLD 25.0  // maximum angular velocity threshold(rad/s) for rushing detection
+#define MAX_TIRE_ANGULAR_VELOCITY_THRESHOLD 12.5  // maximum angular velocity threshold(rad/s) for rushing detection
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
