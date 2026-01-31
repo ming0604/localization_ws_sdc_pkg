@@ -271,11 +271,11 @@ add_dependencies(remoteMode ${${PROJECT_NAME}_EXPORTED_TARGETS})
 #add_executable(amm_node src/amm_node.cpp)
 #target_link_libraries(amm_node ${catkin_LIBRARIES} signalProcessing kkt lowerLayer upperLayer -lbiodaq -larmadillo -pthread)
 
-add_executable(vive_initial_pose src/vive_initial_pose.cpp)
-target_link_libraries(vive_initial_pose ${catkin_LIBRARIES})
+# add_executable(vive_initial_pose src/vive_initial_pose.cpp)
+# target_link_libraries(vive_initial_pose ${catkin_LIBRARIES})
 
-add_executable(base_gt src/base_gt.cpp)
-target_link_libraries(base_gt ${catkin_LIBRARIES})
+# add_executable(base_gt src/base_gt.cpp)
+# target_link_libraries(base_gt ${catkin_LIBRARIES})
 # target_link_libraries(amm_node ${catkin_LIBRARIES} signalProcessing kkt lowerLayer upperLayer -lbiodaq)
 
 # include_directories(include /home/lab816/agv_ws/src/wheel_odom/include)
